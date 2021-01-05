@@ -1,12 +1,16 @@
-import sys
+"""
+This module defines the CLI of slackcat
+"""
+
 import datetime
+import sys
 from pathlib import Path
+from typing import Optional
 
 import click
 import toml
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 from slack_sdk import WebClient
-
 
 MAX_ITERATIONS = 1000
 LIMIT = 10
@@ -15,16 +19,16 @@ LIMIT = 10
 class Message(BaseModel):
     ts: datetime.datetime
     text: str
-    type: str = None
-    subtype: str = None
-    user: str = None
-    inviter: str = None
+    type: Optional[str] = None
+    subtype: Optional[str] = None
+    user: Optional[str] = None
+    inviter: Optional[str] = None
 
     def __str__(self):
         return f"{self.ts.isoformat()} {self.text!r}"
 
 
-@click.command()
+@click.command(name="slackcat")
 @click.option("--from-date", default=None)
 @click.option("--channel", required=True)
 def main(from_date, channel):
@@ -39,9 +43,9 @@ def main(from_date, channel):
         conversations = client.conversations_history(
             channel=channel, latest=latest, limit=LIMIT
         )
-        messages = (
+        messages = [
             Message(**message) for message in conversations.data["messages"]
-        )
+        ]
         for message in messages:
             if message.ts.timestamp() < from_date.timestamp():
                 return
@@ -50,8 +54,7 @@ def main(from_date, channel):
             except (BrokenPipeError, IOError):
                 sys.stderr.close()
                 return
-        latest = message.ts.timestamp()
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter
