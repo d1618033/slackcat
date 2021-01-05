@@ -1,0 +1,27 @@
+[tool.black]
+line-length = 79
+
+[tool.poetry]
+name = "slackcat"
+version = "0.1.0"
+description = "Print to stdout slack messages in reverse order (for grep fun and profit)"
+authors = ["David Sternlicht <dsternlicht@infinidat.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^7.1.2"
+pydantic = "^1.7.3"
+slack-sdk = "^3.1.0"
+toml = "^0.10.2"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b1"
+flake8 = "^3.8.4"
+isort = "^5.7.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+slackcat = 'slackcat.entry_point.main:main'
