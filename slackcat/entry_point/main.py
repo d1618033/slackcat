@@ -26,7 +26,7 @@ class Message(BaseModel):
 
 @click.command()
 @click.option("--from-date", default=None)
-@click.option("--channel")
+@click.option("--channel", required=True)
 def main(from_date, channel):
     config = toml.load(Path.home() / ".slackcat.toml")
     client = WebClient(token=config["credentials"]["token"])
