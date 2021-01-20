@@ -3,7 +3,6 @@ This module defines the CLI of slackcat
 """
 
 import datetime
-import sys
 
 import click
 from slack_sdk import WebClient
@@ -11,6 +10,7 @@ from slack_sdk import WebClient
 from ..cache import Cache, MessageCache
 from ..config import config
 from ..slack_iter import iter_messages
+from ..utils import print_messages
 
 
 @click.command(name="slackcat")
@@ -26,14 +26,11 @@ def main(from_date, channel):
     if channel is None:
         raise click.ClickException("Channel cannot be empty")
 
-    for message in iter_messages(
-        client, from_date=from_date, channel=channel, cache=cache
-    ):
-        try:
-            print(message, flush=True)
-        except (BrokenPipeError, IOError):
-            sys.stderr.close()
-            return
+    print_messages(
+        iter_messages(
+            client, from_date=from_date, channel=channel, cache=cache
+        )
+    )
 
 
 if __name__ == "__main__":
