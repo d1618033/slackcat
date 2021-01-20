@@ -12,8 +12,8 @@ from slack_sdk import WebClient
 
 from ..config import config
 
-MAX_ITERATIONS = 1000
-LIMIT = 10
+MAX_ITERATIONS = config.requests.max_number_requests
+LIMIT = config.requests.limit_per_request
 
 
 class Message(BaseModel):
