@@ -4,55 +4,36 @@ This module defines the CLI of slackcat
 
 import datetime
 import sys
-from typing import Optional
 
 import click
-from pydantic import BaseModel  # pylint: disable=no-name-in-module
 from slack_sdk import WebClient
 
+from ..cache import Cache
 from ..config import config
-
-MAX_ITERATIONS = config.requests.max_number_requests
-LIMIT = config.requests.limit_per_request
-
-
-class Message(BaseModel):
-    ts: datetime.datetime
-    text: str
-    type: Optional[str] = None
-    subtype: Optional[str] = None
-    user: Optional[str] = None
-    inviter: Optional[str] = None
-
-    def __str__(self):
-        return f"{self.ts.isoformat()} {self.text!r}"
+from ..slack_iter import iter_messages
 
 
 @click.command(name="slackcat")
 @click.option("--from-date", default=None)
 @click.option("--channel", default=config.defaults.channel)
 def main(from_date, channel):
+    cache = Cache(config.cache.path)
     client = WebClient(token=config.credentials.token)
-    latest = datetime.datetime.now().timestamp()
     if from_date is None:
         from_date = datetime.datetime.now() - datetime.timedelta(days=365)
     else:
         from_date = datetime.datetime.fromisoformat(from_date)
-    for _ in range(MAX_ITERATIONS):
-        conversations = client.conversations_history(
-            channel=channel, latest=latest, limit=LIMIT
-        )
-        messages = [
-            Message(**message) for message in conversations.data["messages"]
-        ]
-        for message in messages:
-            if message.ts.timestamp() < from_date.timestamp():
-                return
-            try:
-                print(message, flush=True)
-            except (BrokenPipeError, IOError):
-                sys.stderr.close()
-                return
+    if channel is None:
+        raise click.ClickException("Channel cannot be empty")
+
+    for message in iter_messages(
+        client, from_date=from_date, channel=channel, cache=cache
+    ):
+        try:
+            print(message, flush=True)
+        except (BrokenPipeError, IOError):
+            sys.stderr.close()
+            return
 
 
 if __name__ == "__main__":

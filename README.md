@@ -13,11 +13,18 @@ but you can also use pip:
 pip install git+https://github.com/d1618033/slackcat.git
 ```
 
-After the installation finishes, create a config file with your slack token in `~/.slackcat.toml`:
+After the installation finishes, create a config file with your slack token in `~/.slackcat/config.toml`:
 
 ```
 [credentials]
 token = "..."
+
+[defaults]
+channel = ".."
+
+[requests]
+
+[cache]
 ```
 
 Usage
