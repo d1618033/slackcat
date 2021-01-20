@@ -1,6 +1,7 @@
 # pylint: disable=no-member
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 from sqlalchemy import Column, DateTime, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -24,17 +25,19 @@ class Cache:
         Base.metadata.create_all(self._engine)
         self._session = sessionmaker(bind=self._engine)()
 
-    def set(self, date: datetime, value):
+    def set(self, date: datetime, value: str):
         if item := self._session.query(Item).filter_by(date=date).first():
             item.value = value
         else:
             item = Item(date=date, value=value)
         self._session.add(item)
 
-    def get(self, date: datetime):
+    def get(self, date: datetime) -> str:
         return self._session.query(Item).filter_by(date=date).first().value
 
-    def get_in_range(self, from_date: datetime, to_date: datetime):
+    def get_in_range(
+        self, from_date: datetime, to_date: datetime
+    ) -> List[str]:
         return [
             item.value
             for item in self._session.query(Item)
