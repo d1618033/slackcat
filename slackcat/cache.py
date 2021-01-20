@@ -25,7 +25,11 @@ class Cache:
         self._session = sessionmaker(bind=self._engine)()
 
     def set(self, date: datetime, value):
-        self._session.add(Item(date=date, value=value))
+        if item := self._session.query(Item).filter_by(date=date).first():
+            item.value = value
+        else:
+            item = Item(date=date, value=value)
+        self._session.add(item)
 
     def get(self, date: datetime):
         return self._session.query(Item).filter_by(date=date).first().value

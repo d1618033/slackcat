@@ -33,3 +33,10 @@ def test_get_in_range(cache):
     assert cache.get_in_range(from_date, to_date) == [
         f"Hello world {i}" for i in range(5, 10)
     ]
+
+
+def test_duplicate_date(cache):
+    date = datetime.now()
+    cache.set(date, "hello")
+    cache.set(date, "bye")
+    assert cache.get(date) == "bye"
