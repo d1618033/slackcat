@@ -4,13 +4,13 @@ This module defines the CLI of slackcat
 
 import datetime
 import sys
-from pathlib import Path
 from typing import Optional
 
 import click
-import toml
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 from slack_sdk import WebClient
+
+from ..config import config
 
 MAX_ITERATIONS = 1000
 LIMIT = 10
@@ -30,10 +30,9 @@ class Message(BaseModel):
 
 @click.command(name="slackcat")
 @click.option("--from-date", default=None)
-@click.option("--channel", required=True)
+@click.option("--channel", default=config.defaults.channel)
 def main(from_date, channel):
-    config = toml.load(Path.home() / ".slackcat.toml")
-    client = WebClient(token=config["credentials"]["token"])
+    client = WebClient(token=config.credentials.token)
     latest = datetime.datetime.now().timestamp()
     if from_date is None:
         from_date = datetime.datetime.now() - datetime.timedelta(days=365)
