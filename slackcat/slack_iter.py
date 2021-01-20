@@ -1,10 +1,9 @@
 import datetime
-import json
 from typing import Iterable
 
 from slack_sdk import WebClient
 
-from .cache import Cache
+from .cache import MessageCache
 from .config import config
 from .message import Message
 
@@ -36,20 +35,17 @@ def iter_messages(
     *,
     channel: str,
     from_date: datetime.datetime,
-    cache: Cache,
+    cache: MessageCache,
 ) -> Iterable[Message]:
     now = datetime.datetime.now()
-    if cached_messages := cache.get_in_range(from_date, now):
-        messages = [
-            Message(**json.loads(message)) for message in cached_messages
-        ][::-1]
-        yield from messages
-        latest = messages[-1].ts.timestamp()
+    if messages := cache.get_in_range(from_date, now):
+        yield from reversed(messages)
+        latest = messages[0].ts.timestamp()
     else:
         latest = now.timestamp()
     for message in _fetch_messages(client, channel=channel, latest=latest):
         if message.ts.timestamp() < from_date.timestamp():
             break
-        cache.set(message.ts, message.json())
+        cache.add(message)
         yield message
     cache.sync()

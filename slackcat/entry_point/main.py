@@ -8,7 +8,7 @@ import sys
 import click
 from slack_sdk import WebClient
 
-from ..cache import Cache
+from ..cache import Cache, MessageCache
 from ..config import config
 from ..slack_iter import iter_messages
 
@@ -17,7 +17,7 @@ from ..slack_iter import iter_messages
 @click.option("--from-date", default=None)
 @click.option("--channel", default=config.defaults.channel)
 def main(from_date, channel):
-    cache = Cache(config.cache.path)
+    cache = MessageCache(Cache(config.cache.path))
     client = WebClient(token=config.credentials.token)
     if from_date is None:
         from_date = datetime.datetime.now() - datetime.timedelta(days=365)

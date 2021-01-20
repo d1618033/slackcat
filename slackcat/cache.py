@@ -1,4 +1,5 @@
 # pylint: disable=no-member
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -6,6 +7,8 @@ from typing import List
 from sqlalchemy import Column, DateTime, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from .message import Message
 
 Base = declarative_base()
 
@@ -47,3 +50,22 @@ class Cache:
 
     def sync(self):
         self._session.commit()
+
+
+class MessageCache:
+    def __init__(self, cache: Cache):
+        self._cache = cache
+
+    def add(self, message: Message):
+        self._cache.set(message.ts, message.json())
+
+    def get_in_range(
+        self, from_date: datetime, to_date: datetime
+    ) -> List[Message]:
+        return [
+            Message(**json.loads(value))
+            for value in self._cache.get_in_range(from_date, to_date)
+        ]
+
+    def sync(self):
+        self._cache.sync()
