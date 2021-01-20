@@ -16,7 +16,7 @@ def _fetch_messages(
     client: WebClient,
     *,
     channel: str,
-    latest: datetime.datetime,
+    latest: float,
 ) -> Iterable[Message]:
     for _ in range(MAX_ITERATIONS):
         conversations = client.conversations_history(
