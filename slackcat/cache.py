@@ -45,6 +45,7 @@ class Cache:
             item.value
             for item in self._session.query(Item)
             .filter(Item.date >= from_date, Item.date <= to_date)
+            .order_by(Item.date)
             .all()
         ]
 
