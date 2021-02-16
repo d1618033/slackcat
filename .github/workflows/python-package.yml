@@ -32,4 +32,6 @@ jobs:
     - name: Test with pytest
       run: |
         source venv/bin/activate
+        mkdir -p ~/.slackcat
+        cp sample-config.toml ~/.slackcat/config.toml
         make test

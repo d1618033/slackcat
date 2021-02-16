@@ -1,0 +1,9 @@
+[credentials]
+token = "..."
+
+[defaults]
+channel = "..."
+
+[requests]
+
+[cache]
